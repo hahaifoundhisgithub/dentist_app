@@ -10,8 +10,14 @@ load_dotenv()
 
 DEBUG = False
 
-# 從環境變數讀取允許的主機
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+# 從環境變數讀取允許的主機；若未設定或為空，預設放行全部（Zeabur 會自動填 Host）
+_hosts = os.getenv('ALLOWED_HOSTS')
+ALLOWED_HOSTS = _hosts.split(',') if _hosts else ['*']
+
+# Zeabur 建議也設定 CSRF 信任來源（以逗號分隔），未設定則略過
+_csrf = os.getenv('CSRF_TRUSTED_ORIGINS')
+if _csrf:
+    CSRF_TRUSTED_ORIGINS = _csrf.split(',')
 
 # 資料庫設定
 # Zeabur 會自動注入 POSTGRES_CONNECTION_STRING
