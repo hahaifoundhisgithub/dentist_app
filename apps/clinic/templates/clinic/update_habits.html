@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="card shadow-card border border-gray-200 mb-5">
+            <div class="card-header bg-white py-3 border-b border-gray-200">
+                <h4 class="mb-0 text-gray-800 font-bold border-l-4 border-brand ps-3">
+                    A. 李克特量表題目 (1~7分)
+                </h4>
+                <p class="text-xs text-gray-500 mt-1 ps-3 mb-0">例如：您是否滿意自己的牙齒顏色？ (1:非常不滿意 ~ 7:非常滿意)</p>
+            </div>
+            <div class="card-body p-0">
+                {{ likert_formset.management_form }}
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-gray-50 text-gray-600 font-bold text-sm uppercase">
+                            <tr>
+                                <th style="width: 35%" class="py-3 px-4">調查題目</th>
+                                <th style="width: 20%">選項1 標籤 (Min)</th>
+                                <th style="width: 20%">選項7 標籤 (Max)</th>
+                                <th style="width: 10%" class="text-center">啟用</th>
+                                <th style="width: 15%" class="text-center">刪除</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for form in likert_formset %}
+                                <tr>
+                                    {{ form.id }}
+                                    <td class="px-4 py-3">{{ form.name }}</td>
+                                    <td class="px-2">{{ form.min_label }}</td>
+                                    <td class="px-2">{{ form.max_label }}</td>
+                                    <td class="px-2 text-center">
+                                        <div class="form-check form-switch d-flex justify-content-center">
+                                            {{ form.is_active }}
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        {% if likert_formset.can_delete %}
+                                            <div class="d-flex justify-content-center items-center">
+                                                {{ form.DELETE }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-card border border-gray-200 mb-5">
+            <div class="card-header bg-white py-3 border-b border-gray-200">
+                <h4 class="mb-0 text-gray-800 font-bold border-l-4 border-brand ps-3">
+                    B. 連續資料題目 (數值輸入)
+                </h4>
+                <p class="text-xs text-gray-500 mt-1 ps-3 mb-0">例如：您每天刷牙幾次？ (輸入數字)</p>
+            </div>
+            <div class="card-body p-0">
+                {{ continuous_formset.management_form }}
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-indigo-50 text-indigo-900 font-bold text-sm uppercase">
+                            <tr>
+                                <th style="width: 50%" class="py-3 px-4">問題內容</th>
+                                <th style="width: 20%">單位 (如: 次/天)</th>
+                                <th style="width: 15%" class="text-center">啟用</th>
+                                <th style="width: 15%" class="text-center">刪除</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for form in continuous_formset %}
+                                <tr>
+                                    {{ form.id }}
+                                    <td class="px-4 py-3">{{ form.question }}</td>
+                                    <td class="px-2">{{ form.unit }}</td>
+                                    <td class="px-2 text-center">
+                                        <div class="form-check form-switch d-flex justify-content-center">
+                                            {{ form.is_active }}
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        {% if continuous_formset.can_delete %}
+                                            <div class="d-flex justify-content-center items-center">
+                                                {{ form.DELETE }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:pl-72 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50">
+            <div class="container flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    系統會自動為兩個表格各保留一列空白欄位。
+                </div>
+                <div class="space-x-3">
+                    <a href="{% url 'member_home' %}" class="btn btn-outline-secondary px-6">取消返回</a>
+                    <button type="submit" class="btn btn-primary px-8 py-2 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition">
+                        儲存所有變更
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="h-20"></div>
+
+    </form>
+</div>
+{% endblock %}

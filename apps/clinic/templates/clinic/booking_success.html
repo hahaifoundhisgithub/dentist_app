@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto mt-16 px-4 max-w-lg text-center mb-20">
+    <div class="bg-white p-10 rounded-3xl shadow-2xl border border-gray-100 relative overflow-hidden">
+        
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand to-purple-600"></div>
+
+        <h1 class="text-4xl font-black text-gray-800 mb-2">線上掛號成功!</h1>
+        <p class="text-gray-500 mb-10">您的預約已完成，請準時報到。</p>
+        
+        <div class="bg-gray-50 p-8 rounded-2xl border border-gray-200 text-left space-y-4 mb-8">
+            <div class="flex justify-between items-end border-b border-gray-200 pb-3">
+                <span class="text-gray-500 font-medium">看診日期</span>
+                <span class="font-bold text-2xl text-gray-800">{{ appointment.date|date:"Y/m/d" }}</span>
+            </div>
+            <div class="flex justify-between items-end border-b border-gray-200 pb-3">
+                <span class="text-gray-500 font-medium">預約時段</span>
+                <span class="font-bold text-2xl text-gray-800">{{ appointment.get_time_slot_display }}</span>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-gray-500 font-medium">預約號碼</span>
+                <span class="font-black text-5xl text-brand">{{ appointment.registration_number }}</span>
+            </div>
+        </div>
+
+        <a href="{% url 'member_home' %}" class="block w-full py-4 bg-brand text-white rounded-xl font-bold text-lg shadow-lg hover:bg-brand-dark transition transform hover:-translate-y-1 no-underline">
+            回到首頁
+        </a>
+    </div>
+</div>
+{% endblock %}

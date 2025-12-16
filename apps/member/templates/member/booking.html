@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}線上掛號 - 選擇時段{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-2xl font-bold mb-4 text-brand-dark border-l-4 border-brand ps-3">選擇掛號時段 (未來7天)</h2>
+    
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {% for day in days_data %}
+        <div class="bg-white p-4 rounded-lg shadow-card border border-gray-200 hover:shadow-md transition">
+            <div class="font-bold text-lg mb-3 text-center bg-gray-50 p-2 rounded text-gray-700">
+                {{ day.date|date:"m/d" }} ({{ day.weekday_display }})
+            </div>
+            
+            <div class="space-y-2">
+                {% for slot in day.slots %}
+                    {% if slot.is_full %}
+                        <button disabled class="w-full py-2 px-4 bg-gray-100 text-gray-400 rounded cursor-not-allowed flex justify-between items-center border border-transparent">
+                            <span>{{ slot.label }}</span>
+                            <span class="text-xs font-bold bg-gray-200 px-2 py-1 rounded">已額滿</span>
+                        </button>
+                    {% else %}
+                        <a href="{% url 'booking_confirm' day.date|date:'Y-m-d' slot.name %}" 
+                           class="block w-full py-2 px-4 bg-white border border-brand text-brand hover:bg-brand hover:text-white rounded transition flex justify-between items-center group shadow-sm hover:shadow">
+                            <span class="font-medium">{{ slot.label }}</span>
+                            
+                            <span class="text-xs bg-brand-light/30 text-brand-dark px-2 py-1 rounded group-hover:bg-white/20 group-hover:text-white font-bold transition">
+                                剩 {{ slot.remaining }} 名
+                            </span>
+                        </a>
+                    {% endif %}
+                {% empty %}
+                    <div class="text-center text-gray-400 py-4 italic bg-gray-50/50 rounded border border-dashed border-gray-200">
+                        本日休診
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

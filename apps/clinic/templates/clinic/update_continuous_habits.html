@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-card border border-gray-200">
+        <div class="card-header bg-white py-3">
+            <h4 class="mb-0 text-gray-800 font-bold border-l-4 border-brand ps-3">管理連續資料問題 (數值填寫)</h4>
+        </div>
+        <div class="card-body p-4">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                {{ formset.management_form }}
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-gray-50 text-gray-600 font-bold text-sm uppercase">
+                            <tr>
+                                <th style="width: 50%">問題內容</th>
+                                <th style="width: 20%">單位 (如: 次/天)</th>
+                                <th style="width: 15%">啟用</th>
+                                <th style="width: 15%">刪除</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for form in formset %}
+                                <tr>
+                                    {{ form.id }}
+                                    <td class="px-2">{{ form.question }}</td>
+                                    <td class="px-2">{{ form.unit }}</td>
+                                    <td class="px-2 text-center">{{ form.is_active }}</td>
+                                    <td class="px-2 text-center">
+                                        {% if formset.can_delete %}
+                                            {{ form.DELETE }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">儲存變更</button>
+                    <a href="{% url 'member_home' %}" class="btn btn-outline-secondary">返回首頁</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="bg-white rounded-lg shadow-card border border-gray-200 overflow-hidden">
+                
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h4 class="mb-0 text-gray-800 font-bold text-xl border-l-4 border-brand ps-3">
+                        設定診所資訊與標語
+                    </h4>
+                </div>
+
+                <div class="p-6">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="mb-4 p-3 rounded-md {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200{% else %}bg-blue-50 text-blue-700{% endif %} flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="border border-gray-200 rounded-lg p-5 mb-6">
+                            <h5 class="text-brand-dark font-bold mb-4 border-b border-gray-200 pb-2">
+                                基本聯絡資訊
+                            </h5>
+                            
+                            <div class="mb-4">
+                                <label class="block font-bold mb-1 text-gray-700">診所地址</label>
+                                {{ form.address }}
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="block font-bold mb-1 text-gray-700">聯絡電話</label>
+                                {{ form.phone }}
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-5 mb-6">
+                            <h5 class="text-brand-dark font-bold mb-4 border-b border-gray-200 pb-2">
+                                首頁歡迎看板
+                            </h5>
+
+                            <div class="mb-4">
+                                <label class="block font-bold mb-1 text-gray-700">首頁大標題</label>
+                                {{ form.slogan_title }}
+                                <p class="text-xs text-gray-400 mt-1">
+                                    顯示在首頁最顯眼的位置。
+                                </p>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="block font-bold mb-1 text-gray-700">首頁副標題</label>
+                                {{ form.slogan_content }}
+                                <p class="text-xs text-gray-400 mt-1">
+                                    標題下方的描述文字。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-primary py-3 text-lg font-bold shadow-md hover:shadow-lg transition">
+                                儲存設定
+                            </button>
+                            <a href="{% url 'member_home' %}" class="btn btn-outline-secondary py-2 border-0">
+                                返回首頁
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

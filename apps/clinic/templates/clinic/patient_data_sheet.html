@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto mt-8 px-4 mb-12 max-w-full">
+    
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">
+            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-lg mr-2">後台</span>
+            看診資料總表
+        </h2>
+        
+        <div class="flex items-center space-x-4">
+            <div class="text-sm text-gray-500">
+                共 {{ data_rows|length }} 筆資料
+            </div>
+            
+            <a href="{% url 'export_patient_csv' %}" 
+               class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition font-bold no-underline">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                匯出 CSV
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-card border border-gray-200 overflow-x-auto pb-4">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-gray-200 transition group"
+                        onclick="window.location.href='?sort=date'">
+                        日期 
+                        <span class="text-gray-300 group-hover:text-purple-600">{% if current_sort == 'date' %}▼{% else %}⇅{% endif %}</span>
+                    </th>
+
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-gray-200 transition group"
+                        onclick="window.location.href='?sort=time'">
+                        時段
+                        <span class="text-gray-300 group-hover:text-purple-600">{% if current_sort == 'time' %}▼{% else %}⇅{% endif %}</span>
+                    </th>
+
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-gray-200 transition group"
+                        onclick="window.location.href='?sort=pid'">
+                        身分證字號 
+                        <span class="text-gray-300 group-hover:text-purple-600">{% if current_sort == 'pid' %}▼{% else %}⇅{% endif %}</span>
+                    </th>
+
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-gray-200 transition group"
+                        onclick="window.location.href='?sort=name'">
+                        姓名
+                        <span class="text-gray-300 group-hover:text-purple-600">{% if current_sort == 'name' %}▼{% else %}⇅{% endif %}</span>
+                    </th>
+
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-gray-200 transition group"
+                        onclick="window.location.href='?sort=age'">
+                        年齡
+                        <span class="text-gray-300 group-hover:text-purple-600">{% if current_sort == 'age' %}▼{% else %}⇅{% endif %}</span>
+                    </th>
+
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap bg-yellow-50">
+                        主訴問題
+                    </th>
+
+                    {% for h in headers %}
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap border-l border-gray-200 cursor-pointer hover:bg-gray-200 transition group" 
+                        title="{{ h.name }}"
+                        onclick="window.location.href='?sort={{ h.sort_key }}'">
+                        
+                        {{ h.name|truncatechars:8 }}
+                        
+                        <span class="text-gray-300 group-hover:text-purple-600 ml-1">
+                            {% if current_sort == h.sort_key %}▼{% else %}⇅{% endif %}
+                        </span>
+                    </th>
+                    {% endfor %}
+
+                    <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap bg-gray-100 border-l border-gray-200 sticky right-0 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]">
+                        操作
+                    </th>
+                </tr>
+            </thead>
+            
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for row in data_rows %}
+                <tr class="hover:bg-purple-50 transition-colors">
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-mono">
+                        {{ row.date|date:"Y/m/d" }}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {{ row.appt.get_time_slot_display }}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-purple-700 font-mono">
+                        {{ row.pid }}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        {{ row.name }}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
+                        {{ row.age }}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-700 bg-yellow-50/50 max-w-xs truncate" title="{{ row.symptoms }}">
+                        {{ row.symptoms }}
+                    </td>
+
+                    {% for ans in row.answers %}
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center border-l border-gray-100">
+                        {% if ans != "-" %}
+                            <span class="font-bold text-gray-800">{{ ans }}</span>
+                        {% else %}
+                            <span class="text-gray-300">-</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+
+                    <td class="px-4 py-3 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50 sticky right-0 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]">
+                        <form action="{% url 'hide_appointment' row.appt.id %}" method="post" 
+                              onsubmit="return confirm('確定要刪除這筆資料嗎？\n(注意：資料庫仍會保留，但在前台將不再顯示)');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-gray-400 hover:text-red-600 transition p-1 rounded-full hover:bg-red-50" title="刪除此筆">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="100" class="px-6 py-10 text-center text-gray-500">
+                        目前尚無任何掛號資料
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 text-center">
+        <a href="{% url 'member_home' %}" class="text-gray-500 hover:text-purple-600 underline">返回首頁</a>
+    </div>
+</div>
+{% endblock %}

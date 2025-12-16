@@ -1,0 +1,77 @@
+/* apps/core/static/core/css/global.css */
+/* 全域樣式 - 所有頁面共用 */
+
+/* 側邊欄連結樣式 */
+.sidebar-link {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  /* 頁面滾動時平滑效果 */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* 自訂捲軸樣式 (Webkit 瀏覽器) */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  /* 強制覆蓋 Bootstrap 的 Primary 顏色，改成您的主色 #83729D */
+.btn-primary {
+  background-color: #83729D !important;
+  border-color: #83729D !important;
+  color: #fff !important;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: #6A5A80 !important; /* 變深一點 */
+  border-color: #6A5A80 !important;
+}
+
+/* 覆蓋卡片標題背景 */
+.card-header.bg-primary {
+  background-color: #83729D !important;
+}
+
+.card-header.bg-success {
+  background-color: #83729D !important; /* 統一使用主色 */
+}
+
+.btn-success {
+  background-color: #83729D !important; /* 統一按鈕顏色 */
+  border-color: #83729D !important;
+}
+
+.btn-success:hover {
+  background-color: #6A5A80 !important;
+  border-color: #6A5A80 !important;
+}
+
+/* 讓表格標頭也配合副色 */
+.text-indigo-900 {
+  color: #6A5A80 !important;
+}
+
+.bg-indigo-50 {
+  background-color: #F5F5FA !important; /* 使用我們定義的淡背景色 */
+}
+
+/* 修正表格內的綠色打勾顏色，讓它協調一點 */
+.text-green-600 {
+  color: #83729D !important; /* 打圈圈改成主色 */
+}
+.bg-green-50 {
+  background-color: rgba(131, 114, 157, 0.1) !important; /* 打圈圈背景改成淡淡的主色 */
+}

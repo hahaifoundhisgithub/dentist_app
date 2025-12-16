@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto mt-8 px-4 mb-12">
+    
+    <div class="bg-white rounded-xl shadow-card border border-gray-100 p-8 text-center max-w-2xl mx-auto mb-10 relative overflow-hidden">
+        
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-900/10 rounded-full blur-2xl"></div>
+        
+        <h2 class="text-3xl font-extrabold {{ status_color }} mb-4 drop-shadow-sm">
+            {{ clinic_status }}
+        </h2>
+
+        {% if is_open %}
+            <div class="mt-6 p-6 bg-gradient-to-b from-gray-50 to-white rounded-xl border border-gray-200 shadow-inner">
+                <p class="text-gray-500 text-sm font-bold mb-2 uppercase tracking-widest">目前叫號</p>
+                <div class="text-7xl font-black text-gray-800 font-mono my-2">
+                    {{ current_number }}
+                </div>
+
+                {% if user.is_staff %}
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p class="text-xs text-brand font-bold mb-3">診所控制台</p>
+                    
+                    <div class="flex justify-center items-center gap-3">
+                        <form action="{% url 'call_next_number' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="px-8 py-3 bg-brand text-white rounded-full shadow-lg hover:bg-brand-dark transition font-bold flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                                叫下一號
+                            </button>
+                        </form>
+                
+                        <form action="{% url 'reset_number' %}" method="post" onsubmit="return confirm('確定要將號碼歸零嗎？');">
+                            {% csrf_token %}
+                            <button type="submit" class="px-4 py-3 bg-gray-100 text-gray-500 rounded-full hover:bg-red-50 hover:text-red-600 transition font-bold flex items-center border border-gray-200" title="號碼歸零">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="mt-6 p-6 bg-red-50 rounded-xl border border-red-100 text-red-600">
+                <div class="flex justify-center mb-2">
+                    <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <p class="font-bold">現在非看診時間，叫號系統已關閉。</p>
+                <p class="text-sm mt-1 opacity-80">請參考下方的看診時程表。</p>
+            </div>
+        {% endif %}
+
+        <div class="flex items-center justify-center text-gray-400 text-xs mt-6 font-mono">
+            系統時間：{% now "H:i" %}
+        </div>
+    </div>
+
+    <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 tracking-tight">
+            {{ site_clinic_info.slogan_title|default:"微笑，從這裡開始" }}
+        </h1>
+        <p class="text-xl text-gray-500 mb-8 max-w-2xl mx-auto leading-relaxed">
+            {{ site_clinic_info.slogan_content|default:"我們提供最專業的牙科服務，守護您與家人的口腔健康。" }}
+        </p>
+        
+        <a href="{% url 'booking_select_time' %}" 
+           class="inline-flex items-center px-12 py-5 rounded-full text-white font-bold text-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition duration-300 no-underline"
+           style="background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%); border: 2px solid rgba(255,255,255,0.1);">
+            <svg class="w-7 h-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            立即線上掛號
+        </a>
+    </div>
+
+    <hr class="border-gray-200 my-12">
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden h-full">
+            <div class="bg-gray-50 p-5 border-b border-gray-100 flex items-center">
+                <div class="bg-purple-100 p-2 rounded-full mr-3 text-purple-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">醫師團隊介紹</h2>
+            </div>
+            
+            <div class="p-6">
+                {% if dentists %}
+                    {% for dentist in dentists %}
+                        <div class="mb-6 last:mb-0">
+                            <div class="flex items-baseline mb-2">
+                                <h4 class="text-purple-900 font-bold text-xl mr-3">{{ dentist.name }}</h4>
+                                <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">醫師</span>
+                            </div>
+                            <div class="text-gray-600 leading-relaxed pl-3 border-l-4 border-purple-200">
+                                {{ dentist.description|linebreaks }}
+                            </div>
+                        </div>
+                        {% if not forloop.last %}
+                            <hr class="border-gray-100 my-4">
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-400 italic text-center py-4">目前尚無醫師資料。</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden h-full">
+            <div class="bg-gray-50 p-5 border-b border-gray-100 flex items-center">
+                <div class="bg-purple-100 p-2 rounded-full mr-3 text-purple-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">本週門診時間表</h2>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-center text-sm">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs tracking-wider">
+                            <th class="py-3 px-2 text-left pl-4 font-bold">時段</th>
+                            {% for h in hours %}
+                                <th class="py-3 px-1">{{ h.get_day_of_week_display|slice:"2:" }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr>
+                            <td class="py-4 px-2 text-left pl-4 border-r border-gray-100 bg-gray-50/50">
+                                <span class="font-bold text-gray-800 block">早診</span>
+                                <span class="text-xs text-gray-400">{{ hours.0.morning_time }}</span>
+                            </td>
+                            {% for h in hours %}
+                                <td class="py-2 px-1">
+                                    {% if h.morning %}
+                                        <div class="inline-block w-3 h-3 rounded-full bg-green-500 shadow-sm mx-auto" title="看診"></div>
+                                    {% else %}
+                                        <span class="text-gray-200">-</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-2 text-left pl-4 border-r border-gray-100 bg-gray-50/50">
+                                <span class="font-bold text-gray-800 block">午診</span>
+                                <span class="text-xs text-gray-400">{{ hours.0.afternoon_time }}</span>
+                            </td>
+                            {% for h in hours %}
+                                <td class="py-2 px-1">
+                                    {% if h.afternoon %}
+                                        <div class="inline-block w-3 h-3 rounded-full bg-green-500 shadow-sm mx-auto" title="看診"></div>
+                                    {% else %}
+                                        <span class="text-gray-200">-</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-2 text-left pl-4 border-r border-gray-100 bg-gray-50/50">
+                                <span class="font-bold text-gray-800 block">晚診</span>
+                                <span class="text-xs text-gray-400">{{ hours.0.evening_time }}</span>
+                            </td>
+                            {% for h in hours %}
+                                <td class="py-2 px-1">
+                                    {% if h.evening %}
+                                        <div class="inline-block w-3 h-3 rounded-full bg-green-500 shadow-sm mx-auto" title="看診"></div>
+                                    {% else %}
+                                        <span class="text-gray-200">-</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bg-gray-50 px-4 py-2 text-xs text-gray-400 text-right">
+                <span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1 align-middle"></span> 看診
+                <span class="ml-3 text-gray-300">- 休診</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ formset.management_form }}
+                        
+                        {% for form in formset %}
+                            <div class="card mb-3 border border-gray-200">
+                                <div class="card-header bg-gray-50 fw-bold text-gray-700">
+                                    醫師 #{{ forloop.counter }}
+                                </div>
+                                <div class="card-body">
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+
+                                    {% for field in form.visible_fields %}
+                                        <div class="mb-3">
+                                            <label for="{{ field.id_for_label }}" class="form-label fw-bold text-brand-dark">
+                                                {{ field.label }}
+                                            </label>
+                                            {{ field }}
+                                            {% if field.help_text %}
+                                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in field.errors %}
+                                                <div class="text-danger small">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        {% if not formset.forms %}
+                            <div class="alert alert-warning">
+                                目前沒有醫師資料，請先至 <a href="/admin/clinic/dentist/add/" class="alert-link">後台新增</a>。
+                            </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">儲存所有更新</button>
+                            <a href="/admin/" class="btn btn-secondary">返回管理後台</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

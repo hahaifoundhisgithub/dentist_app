@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if messages %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for message in messages %}
+            alert("{{ message }}");
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+<div class="container mx-auto mt-8 px-4 max-w-2xl mb-12">
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
+        
+        <div class="border-b border-gray-100 pb-4 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">填寫掛號資料</h2>
+            <div class="mt-2 flex items-center text-sm text-gray-500">
+                <span class="bg-brand/10 text-brand px-2 py-1 rounded font-bold mr-2">{{ date_str }}</span>
+                <span class="bg-brand/10 text-brand px-2 py-1 rounded font-bold">{{ slot_name }}</span>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">真實姓名</label>
+                    {{ form.real_name }}
+                </div>
+                
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">年齡</label>
+                    {{ form.age }}
+                    {% if form.age.errors %}
+                        <p class="text-red-500 text-sm mt-1">請輸入實歲年齡</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">身分證字號</label>
+                    {{ form.national_id }}
+                    {% if form.national_id.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.national_id.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 mt-4">
+                    <label class="block font-bold text-gray-800 mb-3 border-b pb-2 border-gray-200">
+                        管理看診問題 (請勾選)
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        {% for checkbox in form.symptoms %}
+                            <label class="flex items-center space-x-2 cursor-pointer hover:bg-white p-2 rounded transition">
+                                {{ checkbox.tag }}
+                                <span class="text-gray-700 text-sm">{{ checkbox.choice_label }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mt-8 pt-4 border-t border-gray-100">
+                <a href="{% url 'booking_select_time' %}" 
+                   class="px-6 py-3 rounded-lg border border-gray-300 text-gray-600 font-bold hover:bg-gray-50 transition no-underline">
+                   返回重選時段
+                </a>
+                
+                <button type="submit" 
+                        class="px-8 py-3 rounded-lg bg-brand text-white font-bold shadow-lg hover:bg-brand-dark hover:shadow-xl transition transform hover:-translate-y-1">
+                    填寫用牙習慣 (下一步)
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    input[type="text"] { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; }
+    input[type="checkbox"] { width: auto; accent-color: #764ba2; margin-right: 6px; }
+</style>
+{% endblock %}

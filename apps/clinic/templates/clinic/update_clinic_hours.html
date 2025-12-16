@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="card shadow-card border border-gray-200">
+        <div class="card-header bg-white py-3 border-b border-gray-200">
+            <h4 class="mb-0 text-gray-800 font-bold border-l-4 border-brand ps-3">更新營業時間與人數上限</h4>
+        </div>
+        <div class="card-body p-4">
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                {{ formset.management_form }}
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-5">
+                    <h5 class="text-blue-800 font-bold mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        時段區間設定
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label font-bold text-gray-600">早診時段</label>
+                            {{ time_form.morning_time }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label font-bold text-gray-600">午診時段</label>
+                            {{ time_form.afternoon_time }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label font-bold text-gray-600">晚診時段</label>
+                            {{ time_form.evening_time }}
+                        </div>
+                    </div>
+                    <div class="text-xs text-blue-600 mt-2">
+                        <i class="fas fa-info-circle"></i> 
+                        此處設定的時間將會統一套用到星期一至星期日。
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center">
+                        <thead class="bg-gray-100 text-gray-700 font-bold">
+                            <tr>
+                                <th style="width: 10%">星期</th>
+                                <th style="width: 30%">早診</th>
+                                <th style="width: 30%">午診</th>
+                                <th style="width: 30%">晚診</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for form in formset %}
+                                <tr>
+                                    {{ form.id }}
+                                    
+                                    <td class="bg-gray-50 font-bold text-brand-dark">
+                                        {{ form.instance.get_day_of_week_display }}
+                                        <div class="hidden">{{ form.day_of_week }}</div>
+                                    </td>
+
+                                    <td class="{% if form.instance.morning %}bg-green-50{% endif %} hover:bg-gray-50 transition">
+                                        <div class="flex items-center justify-center gap-4">
+                                            <div class="form-check form-switch">
+                                                <label class="form-check-label text-sm text-gray-500 font-bold">開啟</label>
+                                                {{ form.morning }}
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="text-sm text-gray-500 mr-2">上限:</span>
+                                                {{ form.morning_limit }}
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td class="{% if form.instance.afternoon %}bg-green-50{% endif %} hover:bg-gray-50 transition">
+                                        <div class="flex items-center justify-center gap-4">
+                                            <div class="form-check form-switch">
+                                                <label class="form-check-label text-sm text-gray-500 font-bold">開啟</label>
+                                                {{ form.afternoon }}
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="text-sm text-gray-500 mr-2">上限:</span>
+                                                {{ form.afternoon_limit }}
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td class="{% if form.instance.evening %}bg-green-50{% endif %} hover:bg-gray-50 transition">
+                                        <div class="flex items-center justify-center gap-4">
+                                            <div class="form-check form-switch">
+                                                <label class="form-check-label text-sm text-gray-500 font-bold">開啟</label>
+                                                {{ form.evening }}
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="text-sm text-gray-500 mr-2">上限:</span>
+                                                {{ form.evening_limit }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 text-center border-t pt-4">
+                    <button type="submit" class="btn btn-primary px-6 py-2 font-bold shadow-md hover:shadow-lg transition">
+                        儲存所有設定
+                    </button>
+                    <a href="{% url 'member_home' %}" class="btn btn-outline-secondary ms-2">返回首頁</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

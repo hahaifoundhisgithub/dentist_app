@@ -1,0 +1,25 @@
+# Python 虛擬環境
+venv/
+*.pyc
+
+# Django/Database 檔案
+db.sqlite3
+/media/
+
+# Secret Keys
+/config/settings/development.py
+/config/settings/production.py
+*.key
+*.pem
+
+# IDE 檔案 (如果你用 VS Code)
+.vscode/
+.env
+.env.local
+# ... (其他內容)
+
+# 新增 Google OAuth 密鑰檔案的路徑
+oauth/oauth_cids.txt
+
+# 讓 Python 自動產生的暫存檔案
+__pycache__/
