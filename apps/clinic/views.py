@@ -34,7 +34,8 @@ def member_home(request):
     # 1. 時間初始化
     now = timezone.localtime(timezone.now())
     current_time = now.time()
-    current_weekday = now.weekday() + 1 
+    # Python weekday(): 0=星期一, 6=星期日，與 ClinicHours.DAY_CHOICES 對齊
+    current_weekday = now.weekday()
 
     clinic_status = "目前休診中"
     status_color = "text-red-500"
@@ -116,7 +117,7 @@ def member_home(request):
 # ==========================================
 # 1. 更新醫師介紹
 # ==========================================
-@user_passes_test(is_admin, login_url='/admin/login/')
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def update_dentist_description(request):
     DentistFormSet = modelformset_factory(Dentist, form=DentistForm, extra=0)
     
@@ -138,8 +139,13 @@ def update_dentist_description(request):
 # ==========================================
 # 2. 更新營業時間
 # ==========================================
-@user_passes_test(is_admin, login_url='/admin/login/')
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def update_clinic_hours(request):
+    # 確保資料庫有 7 天的班表 (星期一~星期日)
+    if ClinicHours.objects.count() < 7:
+        for i in range(7):
+            ClinicHours.objects.get_or_create(day_of_week=i)
+
     HoursFormSet = modelformset_factory(ClinicHours, form=ClinicHoursForm, extra=0)
     first_record = ClinicHours.objects.first()
     initial_time = {
@@ -178,7 +184,7 @@ def update_clinic_hours(request):
 # ==========================================
 # 3. 管理看診問題 (症狀)
 # ==========================================
-@user_passes_test(is_admin, login_url='/admin/login/')
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def update_symptoms(request):
     SymptomFormSet = modelformset_factory(Symptom, form=SymptomForm, extra=1, can_delete=True)
 
@@ -222,7 +228,7 @@ def update_clinic_info(request):
 # ==========================================
 # 5. 管理習慣調查
 # ==========================================
-@user_passes_test(is_admin, login_url='/admin/login/')
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def update_habits(request):
     LikertFormSet = modelformset_factory(DentalHabit, form=DentalHabitForm, extra=1, can_delete=True)
     ContinuousFormSet = modelformset_factory(ContinuousHabit, form=ContinuousHabitForm, extra=1, can_delete=True)
@@ -250,13 +256,14 @@ def update_habits(request):
 # ==========================================
 # 6. 叫下一號 (功能實作)
 # ==========================================
-@user_passes_test(is_admin, login_url='/admin/login/')
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def call_next_number(request):
     if request.method == 'POST':
         try:
             now = timezone.localtime(timezone.now())
             current_time = now.time()
-            current_weekday = now.weekday() + 1
+            # 與 ClinicHours.DAY_CHOICES 一致：0=星期一
+            current_weekday = now.weekday()
             today_schedule = ClinicHours.objects.get(day_of_week=current_weekday)
             session_name = None 
             
@@ -489,7 +496,7 @@ def booking_habit_survey(request):
 # ==========================================
 # 7. 手動歸零功能 (修正版)
 # ==========================================
-@user_passes_test(is_admin, login_url='/admin/login/')
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def reset_number(request):
     if request.method == 'POST':
         try:
@@ -556,7 +563,7 @@ def reset_number(request):
     return redirect(request.META.get('HTTP_REFERER', '/'))
 # 8. 看診資料總表 (Sheet View)
 # ==========================================
-@user_passes_test(is_admin, login_url='/admin/login/')
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def patient_data_sheet(request):
     # 1. 準備表頭 (Headers) - 包含 ID 以便識別
     # 固定表頭不需要在這裡查，前端寫死即可，這裡處理動態表頭
@@ -664,7 +671,7 @@ from django.http import HttpResponse
 # ==========================================
 # 9. 匯出 CSV 功能
 # ==========================================
-@user_passes_test(is_admin, login_url='/admin/login/')
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def export_patient_csv(request):
     # 1. 設定 CSV 回應標頭
     response = HttpResponse(content_type='text/csv')
@@ -738,7 +745,7 @@ def export_patient_csv(request):
 # ==========================================
 # 10. 軟刪除掛號資料 (隱藏而不刪除)
 # ==========================================
-@user_passes_test(is_admin, login_url='/admin/login/')
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def hide_appointment(request, appt_id):
     if request.method == 'POST':
         appt = get_object_or_404(Appointment, id=appt_id)
