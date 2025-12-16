@@ -9,5 +9,9 @@ urlpatterns = [
 
     path('clinic/', include('apps.clinic.urls')),
     path('member/', include('apps.member.urls')),
+
+    # 圖書管理系統目前不上線，所以不掛到主路由
+    # path('library/', include('apps.library.urls')),
+
     path('', include('apps.core.urls')), 
 ]

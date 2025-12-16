@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google', # Google 提供者
-    #'apps.library',
+    # 'apps.library',  # 圖書系統目前不上線，先關閉
     'apps.core', 
     'apps.member', 
     'apps.clinic',  
