@@ -23,7 +23,7 @@
                     <form method="post">
                         {% csrf_token %}
                         {{ formset.management_form }}
-                        
+
                         {% for form in formset %}
                             <div class="card mb-3 border border-gray-200">
                                 <div class="card-header bg-gray-50 fw-bold text-gray-700">
@@ -52,15 +52,9 @@
                             </div>
                         {% endfor %}
 
-                        {% if not formset.forms %}
-                            <div class="alert alert-warning">
-                                目前沒有醫師資料，請先至 <a href="/admin/clinic/dentist/add/" class="alert-link">後台新增</a>。
-                            </div>
-                        {% endif %}
-
                         <div class="d-grid gap-2 mt-4">
                             <button type="submit" class="btn btn-primary btn-lg">儲存所有更新</button>
-                            <a href="/admin/" class="btn btn-secondary">返回管理後台</a>
+                            <a href="{% url 'member_home' %}" class="btn btn-secondary">返回診所首頁</a>
                         </div>
                     </form>
                 </div>

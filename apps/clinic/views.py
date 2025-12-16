@@ -119,10 +119,11 @@ def member_home(request):
 # ==========================================
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def update_dentist_description(request):
-    DentistFormSet = modelformset_factory(Dentist, form=DentistForm, extra=0)
-    
+    # extra=1 讓畫面上永遠至少有一筆可編輯／新增的表單
+    DentistFormSet = modelformset_factory(Dentist, form=DentistForm, extra=1, can_delete=True)
+
     if request.method == 'POST':
-        formset = DentistFormSet(request.POST)
+        formset = DentistFormSet(request.POST, queryset=Dentist.objects.all())
         if formset.is_valid():
             formset.save()
             messages.success(request, '醫師介紹已更新成功！')
