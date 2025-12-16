@@ -1,254 +1,99 @@
 <!-- apps/core/templates/core/home.html -->
-{% extends 'base.html' %} {% block title %}首頁 - 圖書管理系統{% endblock %}
+{% extends 'base.html' %}
+{% block title %}菁美牙醫診所 - 首頁{% endblock %}
 {% block content %}
-<!-- 歡迎區塊 -->
-<div class="mb-12 text-center">
-  <h1 class="text-5xl font-bold text-gray-900 mb-4">📚 圖書管理系統</h1>
-  <p class="text-xl text-gray-600">輕鬆管理您的圖書館藏,掌握書籍與出版社資訊</p>
-</div>
 
-<!-- 功能介紹卡片 -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-  <!-- 書籍管理功能 -->
-  <div
-    class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300"
-  >
-    <div class="flex items-center mb-4">
-      <div class="bg-indigo-100 rounded-full p-4 mr-4">
-        <svg
-          class="w-8 h-8 text-indigo-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-          />
-        </svg>
-      </div>
-      <h2 class="text-2xl font-bold text-gray-900">書籍管理</h2>
-    </div>
-    <p class="text-gray-600 mb-6">
-      輕鬆新增、編輯、刪除書籍資料。管理書名、價格、庫存等資訊,並與出版社建立關聯。
+<div class="max-w-5xl mx-auto">
+  <!-- 歡迎區塊 -->
+  <div class="mb-10 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+      菁美牙醫診所
+    </h1>
+    <p class="text-lg text-gray-600">
+      線上看診狀態、預約掛號與後台管理，一站式完成
     </p>
-    <div class="space-y-2 mb-6">
-      <div class="flex items-center text-gray-700">
-        <svg
-          class="w-5 h-5 text-green-500 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <span>完整的 CRUD 操作</span>
-      </div>
-      <div class="flex items-center text-gray-700">
-        <svg
-          class="w-5 h-5 text-green-500 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <span>卡片與列表雙視圖</span>
-      </div>
-      <div class="flex items-center text-gray-700">
-        <svg
-          class="w-5 h-5 text-green-500 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <span>即時庫存狀態顯示</span>
-      </div>
-    </div>
-    <a
-      href="#"
-      class="inline-flex items-center px-6 py-3 bg-indigo-600 opacity-60 cursor-not-allowed text-white font-semibold rounded-lg"
-    >
-      前往書籍管理（尚未開放）
-      <svg
-        class="w-5 h-5 ml-2"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M13 7l5 5m0 0l-5 5m5-5H6"
-        />
-      </svg>
-    </a>
   </div>
 
-  <!-- 出版社管理功能 -->
-  <div
-    class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300"
-  >
-    <div class="flex items-center mb-4">
-      <div class="bg-purple-100 rounded-full p-4 mr-4">
-        <svg
-          class="w-8 h-8 text-purple-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-          />
-        </svg>
-      </div>
-      <h2 class="text-2xl font-bold text-gray-900">出版社管理</h2>
-    </div>
-    <p class="text-gray-600 mb-6">
-      建立並管理出版社資料,包含名稱、所在城市等資訊。查看每個出版社旗下的書籍清單。
-    </p>
-    <div class="space-y-2 mb-6">
-      <div class="flex items-center text-gray-700">
-        <svg
-          class="w-5 h-5 text-green-500 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <span>新增與編輯出版社</span>
-      </div>
-      <div class="flex items-center text-gray-700">
-        <svg
-          class="w-5 h-5 text-green-500 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <span>查看旗下書籍清單</span>
-      </div>
-      <div class="flex items-center text-gray-700">
-        <svg
-          class="w-5 h-5 text-green-500 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <span>關聯資料智能檢查</span>
-      </div>
-    </div>
+  <!-- 主要入口卡片 -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- 會員看診首頁 -->
     <a
-      href="#"
-      class="inline-flex items-center px-6 py-3 bg-purple-600 opacity-60 cursor-not-allowed text-white font-semibold rounded-lg"
+      href="{% url 'member_home' %}"
+      class="bg-white rounded-xl shadow-card p-6 hover:shadow-lg transition-shadow duration-200 flex flex-col"
     >
-      前往出版社管理（尚未開放）
-      <svg
-        class="w-5 h-5 ml-2"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M13 7l5 5m0 0l-5 5m5-5H6"
-        />
-      </svg>
+      <div class="flex items-center mb-4">
+        <div class="bg-emerald-100 rounded-full p-3 mr-3">
+          <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-900">診所首頁</h2>
+      </div>
+      <p class="text-gray-600 flex-1">
+        查看目前是否看診中、叫號進度、醫師資訊與本週門診時間表。
+      </p>
+      <span class="mt-4 inline-flex items-center text-brand-dark font-medium">
+        前往會員首頁
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </span>
+    </a>
+
+    <!-- 線上預約掛號 -->
+    <a
+      href="{% url 'booking_select_time' %}"
+      class="bg-white rounded-xl shadow-card p-6 hover:shadow-lg transition-shadow duration-200 flex flex-col"
+    >
+      <div class="flex items-center mb-4">
+        <div class="bg-indigo-100 rounded-full p-3 mr-3">
+          <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3M5 11h14M5 19h14M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-900">線上預約掛號</h2>
+      </div>
+      <p class="text-gray-600 flex-1">
+        線上選擇看診日期與時段，填寫資料與習慣調查，完成掛號流程。
+      </p>
+      <span class="mt-4 inline-flex items-center text-brand-dark font-medium">
+        開始預約
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </span>
+    </a>
+
+    <!-- 後台管理入口（管理員） -->
+    <a
+      href="/admin/login/"
+      class="bg-white rounded-xl shadow-card p-6 hover:shadow-lg transition-shadow duration-200 flex flex-col"
+    >
+      <div class="flex items-center mb-4">
+        <div class="bg-rose-100 rounded-full p-3 mr-3">
+          <svg class="w-7 h-7 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 17v-2m3 2v-4m3 4v-6m1-5V5a2 2 0 00-2-2H8a2 2 0 00-2 2v1M5 21h14a2 2 0 002-2v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-900">診所後台管理</h2>
+      </div>
+      <p class="text-gray-600 flex-1">
+        管理醫師介紹、營業時間、問卷題目與看診資料總表等後台功能。
+      </p>
+      <span class="mt-4 inline-flex items-center text-brand-dark font-medium">
+        管理員登入
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </span>
     </a>
   </div>
 </div>
 
-<!-- 快速操作區 -->
-<div class="mt-12 max-w-5xl mx-auto">
-  <div
-    class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg p-8 text-white"
-  >
-    <h2 class="text-2xl font-bold mb-4">🚀 快速開始</h2>
-    <p class="mb-6 text-indigo-100">選擇一個操作立即開始使用系統</p>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <a
-        href="#"
-        class="flex items-center p-4 bg-white/10 opacity-60 cursor-not-allowed rounded-lg"
-      >
-        <svg
-          class="w-6 h-6 mr-3"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-          />
-        </svg>
-        <span class="font-medium">新增書籍（尚未開放）</span>
-      </a>
-      <a
-        href="#"
-        class="flex items-center p-4 bg-white/10 opacity-60 cursor-not-allowed rounded-lg"
-      >
-        <svg
-          class="w-6 h-6 mr-3"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-          />
-        </svg>
-        <span class="font-medium">新增出版社（尚未開放）</span>
-      </a>
-    </div>
-  </div>
-</div>
 {% endblock %}
