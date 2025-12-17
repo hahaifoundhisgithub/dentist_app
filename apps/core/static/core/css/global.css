@@ -75,3 +75,22 @@
 .bg-green-50 {
   background-color: rgba(131, 114, 157, 0.1) !important; /* 打圈圈背景改成淡淡的主色 */
 }
+
+/* 移動端側邊欄樣式 */
+@media (max-width: 767px) {
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 16rem; /* w-64 */
+  }
+
+  #mobile-overlay {
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  #mobile-overlay:not(.hidden) {
+    opacity: 1;
+  }
+}

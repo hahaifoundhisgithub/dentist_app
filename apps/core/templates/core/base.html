@@ -33,11 +33,28 @@
     {% block extra_css %}{% endblock %}
   </head>
   <body class="bg-brand-bg font-sans text-gray-800">
+    <!-- Mobile menu button -->
+    <button id="mobile-menu-button" class="md:hidden fixed top-4 left-4 z-50 p-2 bg-brand text-white rounded-lg shadow-lg hover:bg-brand-dark transition">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+
+    <!-- Mobile overlay -->
+    <div id="mobile-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 hidden"></div>
+
     <div class="flex min-h-screen">
       
-      <aside class="w-64 bg-gradient-to-b from-brand to-[#5E5170] text-white flex-shrink-0 hidden md:block shadow-2xl z-10 flex flex-col h-screen">
-        <div class="p-6 flex-1 flex flex-col overflow-y-auto">
+      <aside id="sidebar" class="w-64 bg-gradient-to-b from-brand to-[#5E5170] text-white flex-shrink-0 fixed md:static h-screen shadow-2xl z-40 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="p-6 flex-1 flex flex-col overflow-y-auto relative">
           
+          <!-- Close button for mobile -->
+          <button id="mobile-close-button" class="md:hidden absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-lg transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+
           <div class="mb-8 flex-shrink-0">
             <a href="{% url 'member_home' %}" class="flex items-center space-x-3 hover:opacity-90 transition group">
               <div class="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition">
@@ -153,7 +170,7 @@
         </div>
       </aside>
 
-      <main class="flex-1 p-8 overflow-y-auto h-screen">
+      <main class="flex-1 p-8 md:p-8 pt-20 md:pt-8 overflow-y-auto h-screen">
         
         {% if messages %}
             <div class="container mx-auto max-w-4xl mb-6">
