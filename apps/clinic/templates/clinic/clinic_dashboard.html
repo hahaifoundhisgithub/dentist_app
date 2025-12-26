@@ -1,0 +1,65 @@
+{% extends 'base.html' %} 
+{% block title %}診所儀表板 | 菁美牙醫{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">診所成效分析</h2>
+        <p class="text-sm text-gray-500">每日預約人數統計</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-card border border-gray-100">
+        <div class="relative w-full h-96"> <canvas id="appointmentsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+{{ labels|json_script:"chart-labels" }}
+{{ data|json_script:"chart-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Retrieve data
+        const labels = JSON.parse(document.getElementById('chart-labels').textContent);
+        const data = JSON.parse(document.getElementById('chart-data').textContent);
+
+        // 2. Setup Context
+        const ctx = document.getElementById('appointmentsChart').getContext('2d');
+        
+        // 3. Create Chart
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '預約人數',
+                    data: data,
+                    backgroundColor: '#83729D', // Using your Brand Purple color
+                    borderRadius: 4,
+                    hoverBackgroundColor: '#6A5A80' // Darker purple on hover
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f3f4f6' }, // Light gray grid lines
+                        ticks: { stepSize: 1 }
+                    },
+                    x: {
+                        grid: { display: false } // Remove vertical grid lines for cleaner look
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

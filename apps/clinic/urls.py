@@ -30,4 +30,6 @@ urlpatterns = [
     path('data/sheet/', views.patient_data_sheet, name='patient_data_sheet'),
     path('data/export/', views.export_patient_csv, name='export_patient_csv'),
     path('data/hide/<int:appt_id>/', views.hide_appointment, name='hide_appointment'),
+    path('dashboard/', views.clinic_dashboard, name='clinic_dashboard'),
+    
 ]

@@ -175,3 +175,59 @@ class AppointmentContinuousResponse(models.Model):
 
     class Meta:
         unique_together = ('appointment', 'question')
+
+# 11. DID 看診資料總表 (完全同步於 Appointment，不顯示給使用者)
+class DID(models.Model):
+    """
+    看診資料總表備份資料庫
+    完全同步於 Appointment 模型，用於內部資料備份與分析
+    不顯示在管理介面中
+    """
+    SLOT_CHOICES = [
+        ('morning', '早診'),
+        ('afternoon', '午診'),
+        ('evening', '晚診'),
+    ]
+    
+    # 對應原始 Appointment 的 ID，用於追蹤
+    appointment_id = models.IntegerField(verbose_name="原始掛號ID", unique=True, db_index=True)
+    
+    # 基本資料欄位（與 Appointment 完全一致）
+    user_id = models.IntegerField(verbose_name="會員ID")
+    user_username = models.CharField(max_length=150, verbose_name="會員帳號", blank=True)
+    date = models.DateField(verbose_name="看診日期")
+    time_slot = models.CharField(max_length=20, choices=SLOT_CHOICES, verbose_name="時段")
+    real_name = models.CharField(max_length=50, verbose_name="真實姓名", default="")
+    age = models.PositiveIntegerField(verbose_name="年齡", default=0)
+    patient_id = models.CharField(max_length=10, verbose_name="身分證字號")
+    
+    # 多對多關係以文字形式儲存（症狀、習慣調查結果）
+    symptoms_text = models.TextField(verbose_name="主訴問題", blank=True, help_text="以逗號分隔的症狀名稱")
+    
+    # 習慣調查結果（李克特量表）- JSON 格式儲存
+    habits_data = models.TextField(verbose_name="用牙習慣調查結果", blank=True, help_text="JSON 格式：{habit_id: score}")
+    
+    # 連續資料調查結果 - JSON 格式儲存
+    continuous_data = models.TextField(verbose_name="連續資料調查結果", blank=True, help_text="JSON 格式：{question_id: value}")
+    
+    registration_number = models.PositiveIntegerField(verbose_name="掛號號碼")
+    created_at = models.DateTimeField(verbose_name="建立時間")
+    is_visible = models.BooleanField(default=True, verbose_name="是否顯示在總表")
+    
+    # 同步時間戳記
+    synced_at = models.DateTimeField(auto_now=True, verbose_name="最後同步時間")
+    
+    class Meta:
+        verbose_name = "DID 看診資料總表"
+        verbose_name_plural = "DID 看診資料總表"
+        # 不在 admin 中顯示
+        managed = True
+        db_table = 'clinic_did'
+        indexes = [
+            models.Index(fields=['appointment_id']),
+            models.Index(fields=['date', 'time_slot']),
+            models.Index(fields=['patient_id']),
+        ]
+    
+    def __str__(self):
+        return f"DID-{self.appointment_id}: {self.date} {self.get_time_slot_display()} - {self.real_name}"

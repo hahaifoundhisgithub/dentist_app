@@ -1,10 +1,16 @@
+import csv
+import codecs
+from datetime import datetime, timedelta
+import time
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.forms import modelformset_factory
 from django.utils import timezone
-from datetime import datetime, timedelta
+from django.db.models import Count
+from django.http import HttpResponse
+from django.core.cache import cache  # Redis Cache
 
 # 引入所有模型
 from .models import (
@@ -31,11 +37,9 @@ def member_home(request):
     """
     首頁：顯示診所看診狀態 (包含醫師與門診表)
     """
-    # 1. 時間初始化
     now = timezone.localtime(timezone.now())
     current_time = now.time()
-    # Python weekday(): 0=星期一, 6=星期日，與 ClinicHours.DAY_CHOICES 對齊
-    current_weekday = now.weekday()
+    current_weekday = now.weekday() # 0=Monday
 
     clinic_status = "目前休診中"
     status_color = "text-red-500"
@@ -44,7 +48,6 @@ def member_home(request):
     current_session = None
     
     try:
-        # 2. 抓取今天的設定
         today_schedule = ClinicHours.objects.get(day_of_week=current_weekday)
         
         def check_time(time_str):
@@ -63,7 +66,6 @@ def member_home(request):
             except Exception:
                 return False
 
-        # 3. 依序檢查
         if today_schedule.morning and check_time(today_schedule.morning_time):
             clinic_status = "目前看診時段：早診"
             status_color = "text-[#228B22]"
@@ -82,7 +84,6 @@ def member_home(request):
             is_open = True
             current_session = 'evening'
             
-        # 4. 撈取叫號
         if is_open and current_session:
             daily_state = DailyClinicState.objects.filter(
                 date=now.date(), 
@@ -99,7 +100,6 @@ def member_home(request):
     except Exception as e:
         print(e)
 
-    # 4. 準備所有要顯示的資料
     site_clinic_info = ClinicInfo.objects.first()
     dentists = Dentist.objects.all()
     hours = ClinicHours.objects.all().order_by('day_of_week')
@@ -119,7 +119,6 @@ def member_home(request):
 # ==========================================
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def update_dentist_description(request):
-    # extra=1 讓畫面上永遠至少有一筆可編輯／新增的表單
     DentistFormSet = modelformset_factory(Dentist, form=DentistForm, extra=1, can_delete=True)
 
     if request.method == 'POST':
@@ -142,7 +141,6 @@ def update_dentist_description(request):
 # ==========================================
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def update_clinic_hours(request):
-    # 確保資料庫有 7 天的班表 (星期一~星期日)
     if ClinicHours.objects.count() < 7:
         for i in range(7):
             ClinicHours.objects.get_or_create(day_of_week=i)
@@ -255,7 +253,7 @@ def update_habits(request):
     })
 
 # ==========================================
-# 6. 叫下一號 (功能實作)
+# 6. 叫下一號
 # ==========================================
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def call_next_number(request):
@@ -263,7 +261,6 @@ def call_next_number(request):
         try:
             now = timezone.localtime(timezone.now())
             current_time = now.time()
-            # 與 ClinicHours.DAY_CHOICES 一致：0=星期一
             current_weekday = now.weekday()
             today_schedule = ClinicHours.objects.get(day_of_week=current_weekday)
             session_name = None 
@@ -306,10 +303,10 @@ def call_next_number(request):
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 # ==========================================
-# ★★★ 新版預約系統 Start ★★★
+# 預約系統
 # ==========================================
 
-# 1. 選擇時段 (近7日)
+# 1. 選擇時段
 @login_required(login_url='/accounts/login/')
 def booking_select_time(request):
     if 'booking_data' in request.session:
@@ -357,7 +354,7 @@ def booking_select_time(request):
         'site_clinic_info': ClinicInfo.objects.first()
     })
 
-# 2. 填寫資料 (第一頁)
+# 2. 填寫資料
 @login_required
 def booking_patient_info(request):
     date_str = request.GET.get('date')
@@ -416,11 +413,7 @@ def booking_patient_info(request):
         'site_clinic_info': ClinicInfo.objects.first()
     })
 
-# 3. 習慣調查 (第二頁) -> 完成
-# apps/clinic/views.py
-
-# ... (上面的程式碼不用動)
-
+# 3. 習慣調查
 @login_required
 def booking_habit_survey(request):
     booking_data = request.session.get('booking_data')
@@ -437,18 +430,12 @@ def booking_habit_survey(request):
                 ).count()
                 new_number = count + 1
 
-                # ★★★ 修正開始：將文字字串轉回日期物件 ★★★
-                # Session 存的是字串 "2025-12-20"，我們要把它轉成 date 物件
                 date_str = booking_data['date']
                 date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
-                # ★★★ 修正結束 ★★★
 
                 appointment = Appointment.objects.create(
                     user=request.user,
-                    
-                    # ★ 這裡改成使用轉換後的 date_obj
                     date=date_obj, 
-                    
                     time_slot=booking_data['slot'],
                     real_name=booking_data['real_name'],
                     age=booking_data['age'],
@@ -489,13 +476,9 @@ def booking_habit_survey(request):
         'form': form,
         'site_clinic_info': ClinicInfo.objects.first()
     })
-# 7. 手動歸零功能 (新增)
-# apps/clinic/views.py
-
-# ... (上面的程式碼不用動)
 
 # ==========================================
-# 7. 手動歸零功能 (修正版)
+# 7. 手動歸零功能
 # ==========================================
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def reset_number(request):
@@ -503,11 +486,8 @@ def reset_number(request):
         try:
             now = timezone.localtime(timezone.now())
             current_time = now.time()
-            
-            # 修正：Python的 weekday 0=週一，剛好對應 Model 的 0=週一，不需 +1
             current_weekday = now.weekday() 
             
-            # 使用 filter().first() 避免如果沒設定班表會直接當機 (Crash)
             today_schedule = ClinicHours.objects.filter(day_of_week=current_weekday).first()
             
             if not today_schedule:
@@ -519,7 +499,6 @@ def reset_number(request):
             def is_in_range(time_str):
                 if not time_str: return False
                 try:
-                    # 處理全形冒號與空格
                     clean = time_str.replace(" ", "").replace("：", ":")
                     if '-' in clean: s, e = clean.split('-')
                     elif '~' in clean: s, e = clean.split('~')
@@ -531,7 +510,6 @@ def reset_number(request):
                 except: 
                     return False
 
-            # 依序檢查時段
             if today_schedule.morning and is_in_range(today_schedule.morning_time):
                 session_name = 'morning'
             elif today_schedule.afternoon and is_in_range(today_schedule.afternoon_time):
@@ -539,7 +517,6 @@ def reset_number(request):
             elif today_schedule.evening and is_in_range(today_schedule.evening_time):
                 session_name = 'evening'
             
-            # 執行歸零
             if session_name:
                 daily_state, created = DailyClinicState.objects.get_or_create(
                     date=now.date(),
@@ -549,7 +526,6 @@ def reset_number(request):
                 daily_state.current_number = 0 # 強制歸零
                 daily_state.save()
                 
-                # 顯示成功訊息 (包含時段名稱)
                 slot_map = {'morning': '早診', 'afternoon': '午診', 'evening': '晚診'}
                 display_name = slot_map.get(session_name, session_name)
                 messages.success(request, f"已成功將【{display_name}】號碼歸零！")
@@ -557,22 +533,20 @@ def reset_number(request):
                 messages.warning(request, "目前時間不在任何看診時段內，無法執行歸零。")
 
         except Exception as e:
-            # ★ 關鍵修改：將具體錯誤顯示出來，而不是只顯示「系統錯誤」
             print(f"歸零錯誤: {e}")
             messages.error(request, f"執行失敗，錯誤原因：{e}")
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
-# 8. 看診資料總表 (Sheet View)
+
+# ==========================================
+# 8. 看診資料總表
 # ==========================================
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def patient_data_sheet(request):
-    # 1. 準備表頭 (Headers) - 包含 ID 以便識別
-    # 固定表頭不需要在這裡查，前端寫死即可，這裡處理動態表頭
     likert_habits = DentalHabit.objects.filter(is_active=True).order_by('id')
     cont_habits = ContinuousHabit.objects.filter(is_active=True).order_by('id')
     
     headers = []
-    # 給每個動態欄位一個索引 ID (index)，方便稍後排序對應
     col_index = 0
     for h in likert_habits:
         headers.append({'name': h.name, 'type': 'likert', 'id': h.id, 'sort_key': f'dyn_{col_index}'})
@@ -581,77 +555,63 @@ def patient_data_sheet(request):
         headers.append({'name': h.question, 'type': 'continuous', 'id': h.id, 'sort_key': f'dyn_{col_index}'})
         col_index += 1
 
-    # 2. 抓取所有資料並組裝
     appointments = Appointment.objects.filter(is_visible=True).select_related('user') 
     
     data_rows = []
     for appt in appointments:
-        # 整理症狀
         symptoms_str = "、".join([s.name for s in appt.symptoms.all()])
         if not symptoms_str: symptoms_str = "-"
 
-        # 整理回答 (預先轉成 dict 加速查找)
         l_answers = {r.habit_id: r.score for r in AppointmentHabitResponse.objects.filter(appointment=appt)}
         c_answers = {r.question_id: r.value for r in AppointmentContinuousResponse.objects.filter(appointment=appt)}
 
-        # 依照 headers 順序填入答案 list
         answers_list = []
         for h in headers:
-            val = "-" # 預設值
+            val = "-" 
             if h['type'] == 'likert':
                 val = l_answers.get(h['id'], "-")
             elif h['type'] == 'continuous':
                 val = c_answers.get(h['id'], "-")
             answers_list.append(val)
 
-        # 組合該列資料
         data_rows.append({
             'appt': appt,
-            'date': appt.date,               # 拉出來方便排序
-            'time': appt.time_slot,          # 拉出來方便排序
-            'pid': appt.patient_id,          # 拉出來方便排序
-            'name': appt.real_name,          # 拉出來方便排序
-            'age': appt.age,                 # 拉出來方便排序
+            'date': appt.date,
+            'time': appt.time_slot,
+            'pid': appt.patient_id,
+            'name': appt.real_name,
+            'age': appt.age,
             'symptoms': symptoms_str,
-            'answers': answers_list          # 這是一個 list，對應 headers 的順序
+            'answers': answers_list
         })
 
-    # 3. 執行排序 (Python In-Memory Sorting)
-    sort_by = request.GET.get('sort', 'date_desc') # 預設依日期新到舊
+    sort_by = request.GET.get('sort', 'date_desc')
 
     def sort_helper(row):
-        # 處理 "-" (空值) 的排序問題，將其視為 -1 或空字串
         val = None
-        
-        # A. 固定欄位排序
         if sort_by == 'date': return row['date']
         if sort_by == 'time': return row['time']
         if sort_by == 'pid': return row['pid']
         if sort_by == 'name': return row['name']
         if sort_by == 'age': return row['age']
         
-        # B. 動態欄位排序 (格式: dyn_0, dyn_1...)
         if sort_by.startswith('dyn_'):
             try:
                 idx = int(sort_by.split('_')[1])
                 val = row['answers'][idx]
-                # 如果是 "-" 轉為 -1 以便數字排序，否則回傳原值
                 if val == "-": return -1
-                return float(val) # 嘗試轉數字排序
+                return float(val)
             except:
-                return -1 # 發生錯誤當作最小值
+                return -1 
         
-        return row['date'] # 預設
+        return row['date']
 
-    # 判斷是否要反向排序 (desc)
     reverse = False
     if sort_by == 'date_desc':
         key_func = lambda x: x['date']
         reverse = True
     else:
         key_func = sort_helper
-        # 如果是日期相關，通常我們希望預設反向(新到舊)，但這裡依據使用者點擊
-        # 這裡為了簡單，除了 date_desc 預設反向外，其他點擊第一次皆為正向
     
     data_rows.sort(key=key_func, reverse=reverse)
 
@@ -661,96 +621,138 @@ def patient_data_sheet(request):
         'current_sort': sort_by,
         'site_clinic_info': ClinicInfo.objects.first(),
     })
-# apps/clinic/views.py
-
-import csv
-import codecs # 用來處理中文編碼
-from django.http import HttpResponse
-
-# ... (上面的程式碼保留)
 
 # ==========================================
 # 9. 匯出 CSV 功能
 # ==========================================
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def export_patient_csv(request):
-    # 1. 設定 CSV 回應標頭
-    response = HttpResponse(content_type='text/csv')
-    # 設定下載檔名 (加入當下時間可避免檔名重複)
+    # 1. Start the Timer
+    start_time = time.time()
+    
+    # 2. Check if the CSV string is already in Redis
+    cached_csv = cache.get('patient_csv_file')
+    
+    if cached_csv:
+        print(f" [⚡] REDIS HIT: Served from cache")
+        response_content = cached_csv
+    else:
+        print(f" [🐢] DB MISS: Generating 5,000 rows from Database...")
+        time.sleep(3)
+        # --- Start Generating CSV (This is the slow part) ---
+        response = HttpResponse(content_type='text/csv')
+        response.write(codecs.BOM_UTF8)
+        
+        # We use a StringBuffer-like approach to capture the content for caching
+        # But simpler for Django: we build the response object, then save its content
+        writer = csv.writer(response)
+
+        # Headers
+        csv_headers = ['看診日期', '時段', '身分證字號', '姓名', '年齡', '主訴問題']
+        likert_habits = DentalHabit.objects.filter(is_active=True).order_by('id')
+        cont_habits = ContinuousHabit.objects.filter(is_active=True).order_by('id')
+        
+        header_ids = [] 
+        for h in likert_habits:
+            csv_headers.append(h.name)
+            header_ids.append({'type': 'likert', 'id': h.id})
+        for h in cont_habits:
+            csv_headers.append(h.question)
+            header_ids.append({'type': 'continuous', 'id': h.id})
+
+        writer.writerow(csv_headers)
+
+        # Huge Query
+        appointments = Appointment.objects.filter(is_visible=True).order_by('-date', 'time_slot')
+
+        # Huge Loop
+        for appt in appointments:
+            symptoms_str = "、".join([s.name for s in appt.symptoms.all()]) or "-"
+            
+            row = [
+                appt.date.strftime('%Y/%m/%d'),
+                appt.get_time_slot_display(),
+                appt.patient_id,
+                appt.real_name,
+                str(appt.age),
+                symptoms_str
+            ]
+            
+            # (Note: Optimizing these queries with prefetch_related would be better, 
+            # but getting it "slow" first helps show the Redis difference!)
+            l_answers = {r.habit_id: r.score for r in AppointmentHabitResponse.objects.filter(appointment=appt)}
+            c_answers = {r.question_id: r.value for r in AppointmentContinuousResponse.objects.filter(appointment=appt)}
+
+            for h in header_ids:
+                if h['type'] == 'likert': val = l_answers.get(h['id'], "-")
+                elif h['type'] == 'continuous': val = c_answers.get(h['id'], "-")
+                row.append(val)
+
+            writer.writerow(row)
+        
+        # Capture the generated content
+        response_content = response.content
+        
+        # Save to Redis for 1 hour (3600 seconds)
+        cache.set('patient_csv_file', response_content, 3600)
+
+    # 3. Stop the Timer & Print
+    end_time = time.time()
+    duration = end_time - start_time
+    print(f" [⏱️] Time Taken: {duration:.4f} seconds")
+
+    # 4. Return the file
+    response = HttpResponse(response_content, content_type='text/csv')
     filename = f"patient_data_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
-
-    # 2. 寫入 BOM (Byte Order Mark) 以解決 Excel 中文亂碼問題
-    response.write(codecs.BOM_UTF8)
-
-    writer = csv.writer(response)
-
-    # 3. 準備表頭 (Headers)
-    # 固定欄位
-    csv_headers = ['看診日期', '時段', '身分證字號', '姓名', '年齡', '主訴問題']
-    
-    # 動態欄位 (習慣調查)
-    likert_habits = DentalHabit.objects.filter(is_active=True).order_by('id')
-    cont_habits = ContinuousHabit.objects.filter(is_active=True).order_by('id')
-    
-    # 記住動態欄位的 ID 順序，以便稍後填值
-    header_ids = [] 
-    
-    for h in likert_habits:
-        csv_headers.append(h.name)
-        header_ids.append({'type': 'likert', 'id': h.id})
-        
-    for h in cont_habits:
-        csv_headers.append(h.question)
-        header_ids.append({'type': 'continuous', 'id': h.id})
-
-    # 寫入第一列 (表頭)
-    writer.writerow(csv_headers)
-
-    # 4. 準備資料內容
-    # 依日期由新到舊排序匯出
-    appointments = Appointment.objects.filter(is_visible=True).order_by('-date', 'time_slot')
-
-    for appt in appointments:
-        # 整理症狀
-        symptoms_str = "、".join([s.name for s in appt.symptoms.all()])
-        if not symptoms_str: symptoms_str = "-"
-
-        # 準備該列資料 (固定欄位)
-        row = [
-            appt.date.strftime('%Y/%m/%d'),
-            appt.get_time_slot_display(),
-            appt.patient_id,
-            appt.real_name,
-            str(appt.age),
-            symptoms_str
-        ]
-
-        # 整理回答 (預先轉成 dict 加速查找)
-        l_answers = {r.habit_id: r.score for r in AppointmentHabitResponse.objects.filter(appointment=appt)}
-        c_answers = {r.question_id: r.value for r in AppointmentContinuousResponse.objects.filter(appointment=appt)}
-
-        # 填入動態欄位答案
-        for h in header_ids:
-            val = ""
-            if h['type'] == 'likert':
-                val = l_answers.get(h['id'], "-")
-            elif h['type'] == 'continuous':
-                val = c_answers.get(h['id'], "-")
-            row.append(val)
-
-        # 寫入這一列
-        writer.writerow(row)
-
     return response
+
 # ==========================================
-# 10. 軟刪除掛號資料 (隱藏而不刪除)
+# 10. 軟刪除掛號資料
 # ==========================================
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def hide_appointment(request, appt_id):
     if request.method == 'POST':
         appt = get_object_or_404(Appointment, id=appt_id)
-        appt.is_visible = False  # 標記為不顯示
+        appt.is_visible = False
         appt.save()
         messages.success(request, f"已刪除(隱藏) {appt.real_name} 的掛號資料。")
     return redirect('patient_data_sheet')
+
+# ==========================================
+# 11. 診所儀表板 (Dashboard) - With Redis Cache
+# ==========================================
+@user_passes_test(is_admin, login_url='/accounts/login/')
+def clinic_dashboard(request):
+    # --- ADD THESE PRINT LINES ---
+    print("\n" + "="*50)
+    print(" >>> CLINIC DASHBOARD IS LOADING... <<<")
+    
+    context = cache.get('clinic_daily_stats')
+
+    if not context:
+        print(" [X] CACHE MISS: Calculating from Database") # <--- Look for this
+        
+        daily_stats = (
+            Appointment.objects
+            .values('date')
+            .annotate(count=Count('id'))
+            .order_by('date')
+        )
+
+        labels = [stat['date'].strftime("%Y-%m-%d") for stat in daily_stats]
+        data = [stat['count'] for stat in daily_stats]
+
+        context = {
+            'labels': labels,
+            'data': data,
+            'site_clinic_info': ClinicInfo.objects.first(),
+        }
+        cache.set('clinic_daily_stats', context, 300)
+    else:
+        print(" [V] CACHE HIT: Loading from Redis") # <--- Or this
+
+    print("="*50 + "\n")
+    # -----------------------------
+
+    return render(request, 'clinic/clinic_dashboard.html', context)
