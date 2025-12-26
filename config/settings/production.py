@@ -41,7 +41,7 @@ else:
     }
 
 # 生產環境安全設定
-#SECURE_SSL_REDIRECT = True  # 強制使用 HTTPS
+SECURE_SSL_REDIRECT = True  # 強制使用 HTTPS
 SESSION_COOKIE_SECURE = True  # Cookie 只能透過 HTTPS 傳輸
 CSRF_COOKIE_SECURE = True  # CSRF Cookie 只能透過 HTTPS 傳輸
 
